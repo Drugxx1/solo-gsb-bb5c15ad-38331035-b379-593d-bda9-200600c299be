@@ -1,0 +1,21 @@
+services:
+  cold-storage-api:
+    build: .
+    image: cold-storage-temperature-api:1.0.0
+    container_name: cold-storage-api
+    # 单条启动命令：构建镜像（内含依赖安装）+ 初始化 + 启动服务
+    command: []
+    environment:
+      # 必要配置：监听地址与端口（默认值见 Dockerfile）
+      APP_HOST: "0.0.0.0"
+      APP_PORT: "8000"
+    ports:
+      # 宿主机端口:容器端口；修改左侧端口即可改变对外访问端口
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import json,os,urllib.request; port=os.environ.get('APP_PORT','8000'); assert json.load(urllib.request.urlopen(f'http://127.0.0.1:{port}/health', timeout=2))['status']=='ok'"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
